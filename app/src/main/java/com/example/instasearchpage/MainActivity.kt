@@ -53,6 +53,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.stringResource
@@ -74,14 +75,24 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val systemUiController = rememberSystemUiController()
+            val useDarkIcons = !isSystemInDarkTheme()
+            LaunchedEffect(Unit){
+                systemUiController.setSystemBarsColor(
+                    color = Color.White,
+                    darkIcons = true
+                ) {
+                    Color.Black
+                }
+            }
+
             InstaSearchPageTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    val systemUiController = rememberSystemUiController()
-                    val useDarkIcons = !isSystemInDarkTheme()
+
+
 
 
 
@@ -97,18 +108,22 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.Search, contentDescription = "",
-                                tint = Color(141, 141, 141, 255),
+                                tint = Color.Black,
                             )
                             BasicTextField(
-                                value = "search",
+                                value = "Search",
                                 onValueChange = {},
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 8.dp),
                                 textStyle = TextStyle(
                                     color = Color(141, 141, 141, 255),
-                                    fontSize = 16.sp
+                                    fontSize = 16.sp,
+
                                 ),
+                                cursorBrush = Brush.linearGradient(colors = listOf(Color.Black,
+                                    Color.Black
+                                )),
                                 singleLine = true
 
 
@@ -117,13 +132,15 @@ class MainActivity : ComponentActivity() {
                         }
 
                     }) {
-                        systemUiController.setSystemBarsColor(
-                            color = Color.White,
-                            darkIcons = true
-                        ) {
-                            Color.Black
-                        }
+
                         Column(modifier = Modifier.padding(it)) {
+                            systemUiController.setSystemBarsColor(
+                                color = Color.White,
+                                darkIcons = true,
+                            ) {
+                                Color.Black
+                            }
+                            systemUiController.statusBarDarkContentEnabled = true
                             AppLayout()
                         }
 
@@ -138,6 +155,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun AppLayout() {
+    val systemUiController = rememberSystemUiController()
     var isLongClick by remember {
         mutableStateOf(false)
     }
@@ -183,6 +201,11 @@ fun AppLayout() {
 
     val viewConfiguration = LocalViewConfiguration.current
     LaunchedEffect(interaction, state.progress) {
+        systemUiController.setSystemBarsColor(
+            color = Color.White,
+            darkIcons = true,
+        )
+        systemUiController.statusBarDarkContentEnabled = true
         progress = state.progress
         height = state.progress * 100
         interaction.interactions.collect { interaction ->
@@ -244,8 +267,10 @@ fun AppLayout() {
 //            )
 //        )
         Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.TopCenter
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+            contentAlignment = Alignment.TopCenter,
         ) {
 
             LazyVerticalStaggeredGrid(
